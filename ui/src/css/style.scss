@@ -1,0 +1,84 @@
+@import "spinner";
+
+$options-panel-width: 260px;
+
+body {
+    margin: 0;
+    background-color: #4d4d4d;
+}
+
+svg {
+    polygon {
+        fill: transparent;
+        fill-opacity: 0;
+        stroke: #f00;
+        stroke-width: 1px;
+    }
+
+    text {
+        font-size: 1%;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+}
+
+.hide {
+    display: none !important;
+}
+
+#spinner-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    z-index: 10000;
+    background-color: #0095ff;
+
+    .sk-cube-grid.sk-cube-grid {
+        width: 8vh;
+        height: 8vh;
+        margin: 46vh auto;
+
+        .sk-cube {
+            background-color: #fff;
+        }
+    }
+}
+
+#options {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: $options-panel-width;
+
+    background-color: #1c1c1c;
+    /* box-shadow: 0 0 4px rgba(0,0,0,0.6); */
+}
+
+#thumbs {
+    position: fixed;
+    top: 0;
+    right: $options-panel-width;
+    bottom: 0;
+    left: 0;
+
+    padding: 10px;
+
+    background-color: #313131;
+
+    .thumbnail {
+        width: 160px;
+        height: 160px;
+        margin: 10px;
+
+        background-color: rgb(218, 216, 212);
+
+        svg {
+            width: 150px;
+            height: 150px;
+            margin: 5px;
+        }
+    }
+}
