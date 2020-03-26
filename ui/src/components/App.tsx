@@ -8,13 +8,14 @@ import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
 import {Face, Face2d, IQuaternion} from "../interfaces";
 import {createOffsetter, Z_NORMAL} from "../geometry";
-import {Sketchup, SketchupData} from "../sketchup";
+import {getUnitHelper, IUnitHelper, Sketchup, SketchupData} from "../sketchup";
 
 export interface AppProps {
 }
 
 export interface AppState {
     loading: boolean;
+    unitHelper?: IUnitHelper;
     faces?: Array<Face>;
     faces2d?: Array<Face2d>;
 }
@@ -34,6 +35,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     setData(data: SketchupData) {
+        const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
 
         const faces2d = faces.map(f => {
@@ -52,9 +54,10 @@ export class App extends React.Component<AppProps, AppState> {
         });
 
         this.setState({
+            loading: false,
+            unitHelper,
             faces,
-            faces2d,
-            loading: false
+            faces2d
         });
     }
 
@@ -64,7 +67,7 @@ export class App extends React.Component<AppProps, AppState> {
         }
 
         return <div>
-            <FacesPanel faces={this.state.faces2d}/>
+            <FacesPanel faces={this.state.faces2d} unitHelper={this.state.unitHelper}/>
             <OptionsPanel/>
         </div>;
     }
