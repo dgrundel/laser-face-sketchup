@@ -64,7 +64,7 @@ module Grundel
               height: 800,
               left: 100,
               top: 100,
-              min_width: 500,
+              min_width: 1000,
               min_height: 500,
               # max_width: 1000,
               # max_height: 1000,

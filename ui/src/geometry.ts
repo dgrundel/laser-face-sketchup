@@ -45,6 +45,15 @@ export const createOffsetter = (outerLoop: Array<IVec3>) => {
     };
 };
 
+export function getWidthHeight(outerLoop: Array<IPoint2d>) {
+    return outerLoop.reduce((max, p) => {
+        return [
+            Math.max(max[0], p.x),
+            Math.max(max[1], p.y)
+        ];
+    }, [0, 0]);
+}
+
 /**
  * Logic from:
  * https://stackoverflow.com/questions/19729831/angle-between-3-points-in-3d-space

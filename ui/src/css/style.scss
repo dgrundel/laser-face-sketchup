@@ -1,6 +1,8 @@
 @import "spinner";
 
 $options-panel-width: 260px;
+$thumbnail-size: 160px;
+$spacing: 20px;
 
 body {
     margin: 0;
@@ -73,24 +75,40 @@ svg {
     bottom: 0;
     left: 0;
 
-    padding: 10px;
+    padding: $spacing/2;
 
     background-color: #313131;
 
     .face-panel-item {
-        height: 160px;
-        margin: 10px;
+        $padding-left: $thumbnail-size + $spacing;
+
+        height: $thumbnail-size;
+        margin: $spacing/2;
+
+        background-color: #424242;
+        position: relative;
+        padding-left: $padding-left;
+
+        width: calc(50% - #{$padding-left + $spacing});
+        float: left;
 
         .thumbnail {
-            width: 160px;
-            height: 160px;
+            width: $thumbnail-size;
+            height: $thumbnail-size;
+
+            position: absolute;
+            top: 0;
+            left: 0;
 
             background-color: rgb(218, 216, 212);
 
             svg {
-                width: 150px;
-                height: 150px;
-                margin: 5px;
+                $svg-spacing: $spacing/2;
+                $svg-size: $thumbnail-size - ($svg-spacing);
+
+                width: $svg-size;
+                height: $svg-size;
+                margin: $svg-spacing/2;
             }
         }
     }

@@ -1,5 +1,6 @@
 import * as React from "react";
 import {Face2d} from "../interfaces";
+import {getWidthHeight} from "../geometry";
 
 export interface RenderedFaceProps {
     className?: string;
@@ -15,12 +16,7 @@ export class RenderedFace extends React.Component<RenderedFaceProps, RenderedFac
         const face = this.props.face;
         const outerLoop = face.outerLoop;
         const otherLoops = face.otherLoops;
-        const widthHeight = outerLoop.reduce((max, p) => {
-            return [
-                Math.max(max[0], p.x),
-                Math.max(max[1], p.y)
-            ];
-        }, [0, 0]);
+        const widthHeight = getWidthHeight(outerLoop);
 
         const viewBoxStr = '0 0 ' + widthHeight.join(' ');
 
