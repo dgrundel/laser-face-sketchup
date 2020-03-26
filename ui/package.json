@@ -10,6 +10,8 @@
   "author": "grundel",
   "license": "MIT",
   "devDependencies": {
+    "@types/react": "^16.9.25",
+    "@types/react-dom": "^16.9.5",
     "css-loader": "^3.4.2",
     "fibers": "^4.0.2",
     "node-sass": "^4.13.1",
@@ -23,6 +25,8 @@
   },
   "dependencies": {
     "@types/node": "^13.9.3",
-    "alfador": "^0.6.1"
+    "alfador": "^0.6.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }

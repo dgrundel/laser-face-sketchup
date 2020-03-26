@@ -71,7 +71,7 @@ module Grundel
               style: UI::HtmlDialog::STYLE_DIALOG
             })
             dialog.add_action_callback("getJson") { |action_context, param1, param2|
-              dialog.execute_script("LaserFace.setJson(#{json})")
+              dialog.execute_script("LaserFace.setFaces(#{json})")
             }
             dialog.set_file(File.expand_path('../ui/dist/index.html', File.dirname(__FILE__)))
             dialog.show

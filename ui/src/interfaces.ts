@@ -4,6 +4,11 @@ export interface Face {
     other_loops: Array<Array<IVec3>>;
 }
 
+export interface Face2d {
+    outerLoop: Array<IPoint2d>;
+    otherLoops: Array<Array<IPoint2d>>;
+}
+
 export interface IVec3 {
     x: number;
     y: number;
@@ -25,6 +30,3 @@ export interface IPoint2d {
 }
 
 
-export interface Sketchup {
-    getJson: () => {};
-}
