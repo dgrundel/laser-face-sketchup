@@ -8,7 +8,7 @@ import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
 import {Face, Face2d, IQuaternion} from "../interfaces";
 import {createOffsetter, Z_NORMAL} from "../geometry";
-import {Sketchup} from "../sketchup";
+import {Sketchup, SketchupData} from "../sketchup";
 
 export interface AppProps {
 }
@@ -30,10 +30,12 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     componentDidMount() {
-        setTimeout(Sketchup.getJson, 0);
+        setTimeout(Sketchup.getData, 0);
     }
 
-    setFaces(faces: Array<Face>) {
+    setData(data: SketchupData) {
+        const faces = data.faces;
+
         const faces2d = faces.map(f => {
             const rotation: IQuaternion = Quaternion.rotationFromTo(f.normal, Z_NORMAL);
             const outerLoop = f.outer_loop.map(v => rotation.rotate(v));

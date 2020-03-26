@@ -3,7 +3,7 @@ require 'sketchup.rb'
 module Grundel
   module LaserFace
 
-    def self.get_json_for_selected_faces
+    def self.get_selected_face_data
       Sketchup.active_model.selection.grep(Sketchup::Face).map { |f|
         {
             normal: f.normal.to_a,
@@ -12,7 +12,7 @@ module Grundel
             },
             other_loops: f.loops.select { |l| true unless l.outer? }.map { |l| l.vertices.map { |v| v.position.to_a } }
         }
-      }.to_json
+      }
     end
 
     unless file_loaded?(__FILE__)
@@ -53,7 +53,10 @@ module Grundel
             #
             #
             #
-            json = get_json_for_selected_faces
+            json = {
+                units: Sketchup.active_model.options['UnitsOptions']['LengthUnit'],
+                faces: get_selected_face_data
+            }.to_json
 
             dialog = UI::HtmlDialog.new({
               dialog_title: 'LaserFace',
@@ -70,8 +73,8 @@ module Grundel
               # max_height: 1000,
               style: UI::HtmlDialog::STYLE_DIALOG
             })
-            dialog.add_action_callback("getJson") { |action_context, param1, param2|
-              dialog.execute_script("LaserFace.setFaces(#{json})")
+            dialog.add_action_callback("getData") { |action_context, param1, param2|
+              dialog.execute_script("LaserFace.setData(#{json})")
             }
             dialog.set_file(File.expand_path('../ui/dist/index.html', File.dirname(__FILE__)))
             dialog.show
