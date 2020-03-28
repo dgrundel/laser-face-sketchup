@@ -38,20 +38,23 @@ export class App extends React.Component<AppProps, AppState> {
         const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
 
-        const faces2d = faces.map(f => {
+        const faces2d: Array<Face2d> = faces.map(f => {
             const rotation: IQuaternion = Quaternion.rotationFromTo(f.normal, Z_NORMAL);
-            const outerLoop = f.outer_loop.map(v => rotation.rotate(v));
+            const outerLoop3d = f.outer_loop.map(v => rotation.rotate(v));
+            const otherLoops3d = f.other_loops.map(loop => loop.map(v => rotation.rotate(v)));
 
-            const offsetter = createOffsetter(outerLoop);
+            const offsetter = createOffsetter(outerLoop3d);
 
-            const outerLoop2d = outerLoop.map(offsetter);
-            const otherLoops = f.other_loops.map(loop => loop.map(v => rotation.rotate(v)).map(offsetter));
+            const outerLoop = outerLoop3d.map(offsetter);
+            const otherLoops = otherLoops3d.map(loop => loop.map(offsetter));
 
             return {
-                outerLoop: outerLoop2d,
+                outerLoop,
                 otherLoops
             };
         });
+
+
 
         this.setState({
             loading: false,

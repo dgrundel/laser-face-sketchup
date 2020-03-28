@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Face2d} from "../interfaces";
-import {getWidthHeight} from "../geometry";
+import {convexHull, getWidthHeight} from "../geometry";
 
 export interface RenderedFaceProps {
     className?: string;
@@ -17,6 +17,7 @@ export class RenderedFace extends React.Component<RenderedFaceProps, RenderedFac
         const outerLoop = face.outerLoop;
         const otherLoops = face.otherLoops;
         const widthHeight = getWidthHeight(outerLoop);
+        const hull = convexHull(outerLoop);
 
         const viewBoxStr = '0 0 ' + widthHeight.join(' ');
 
@@ -37,6 +38,9 @@ export class RenderedFace extends React.Component<RenderedFaceProps, RenderedFac
                     const pointStr = loop.map(p => [p.x, p.y].join(',')).join(' ');
                     return <polygon points={pointStr} vectorEffect={'non-scaling-stroke'}/>;
                 })}
+                <polygon className={'hull'}
+                         points={hull.map(p => [p.x, p.y].join(',')).join(' ')}
+                         vectorEffect={'non-scaling-stroke'}/>
             </svg>
         </div>;
     }

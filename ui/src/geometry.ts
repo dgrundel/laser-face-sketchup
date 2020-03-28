@@ -1,7 +1,7 @@
 import {IPoint2d, IVec3} from "./interfaces";
+
 const Alfador = require("alfador");
 const Vec3 = Alfador.Vec3;
-const Quaternion = Alfador.Quaternion;
 
 export const Z_NORMAL = new Vec3(0, 0, -1);
 
@@ -104,7 +104,7 @@ const computeAngleBetweenPoints = (prev: IVec3, curr: IVec3, next: IVec3): numbe
  * @param a a point
  * @param b another point
  */
-const getDistance = (a: IPoint2d, b: IPoint2d) => {
+export const getDistance = (a: IPoint2d, b: IPoint2d) => {
     const aSq = Math.pow(Math.abs(a.x - b.x), 2);
     const bSq = Math.pow(Math.abs(a.y - b.y), 2);
     const cSq = aSq + bSq;
@@ -132,3 +132,112 @@ const calcAndDisplayAngles = (polygon: Array<IVec3>) => {
     }
     console.log(`sum of angles: ${sum}`);
 };
+
+function pointsEqual(a: IPoint2d, b: IPoint2d) {
+    return a.x === b.x && a.y === b.y;
+}
+
+function getOrientation(p1: IPoint2d, p2: IPoint2d, p: IPoint2d) {
+    // // Determinant
+    // int Orin = (p2.X - p1.X) * (p.Y - p1.Y) - (p.X - p1.X) * (p2.Y - p1.Y);
+    // if (Orin > 0)
+    //     return -1; //          (* Orientation is to the left-hand side  *)
+    // if (Orin < 0)
+    //     return 1; // (* Orientation is to the right-hand side *)
+    // return 0; //  (* Orientation is neutral aka collinear  *)
+
+    const orientation = (p2.x - p1.x) * (p.y - p1.y) - (p.x - p1.x) * (p2.y - p1.y);
+
+    if (orientation === 0) {
+        return 0;
+    }
+    return (orientation > 0) ? -1 : 1;
+}
+
+/**
+ * Find convex hull for a set of points using
+ * the gift wrapping algorithm.
+ *
+ * https://stackoverflow.com/questions/10020949/gift-wrapping-algorithm
+ *
+ * @param points
+ */
+export function convexHull(points: Array<IPoint2d>): Array<IPoint2d> {
+    if (points.length < 3) {
+        return points;
+    }
+
+    const hull: Array<IPoint2d> = [];
+
+    // get leftmost point
+    let pointOnHull: IPoint2d = points.reduce((left, p) => {
+        return p.x < left.x ? p : left;
+    }, points[0]);
+    let endpoint: IPoint2d;
+
+    do {
+        hull.push(pointOnHull);
+        endpoint = points[0];
+        for (let i = 0, len = points.length; i < len; i++) {
+            if (pointsEqual(pointOnHull, endpoint) || getOrientation(pointOnHull, endpoint, points[i]) === -1) {
+                endpoint = points[i];
+            }
+        }
+        pointOnHull = endpoint;
+    } while (endpoint != hull[0]);
+
+    return hull;
+}
+
+/**
+ * Rotate a single point around the origin
+ * See: https://en.wikipedia.org/wiki/Cartesian_coordinate_system#Rotation
+
+ * @param point
+ * @param radians
+ */
+function rotatePointDegrees(point: IPoint2d, radians: number): IPoint2d {
+    const x = point.x;
+    const y = point.y;
+    return {
+        x: (x * Math.cos(radians)) - y * Math.sin(radians),
+        y: (x * Math.sin(radians)) + y * Math.cos(radians)
+    };
+}
+
+/**
+ * Rotate a set of points around the origin
+ *
+ * @param points
+ * @param degrees
+ */
+export function rotatePolygonDegrees(points: Array<IPoint2d>, degrees: number): Array<IPoint2d> {
+    const radians = degrees / 180 * Math.PI;
+    return points.map(point => {
+        return rotatePointDegrees(point, radians);
+    });
+}
+
+/**
+ * Use the rotating calipers algorithm to find the
+ * rotation of the smallest bounding box.
+ *
+ * https://stackoverflow.com/questions/13765200/can-someone-explain-the-rotating-calipers-to-me
+ * > You just go through each edge of the convex hull and
+ * > rotate your points so that edge is along a major axis,
+ * > let's say the X-axis.
+ * > Then you find an axis-aligned bounding box of those points.
+ * > Choose whichever bounding box is smallest.
+ *
+ * > An axis-aligned bounding box can be found by getting
+ * > the minimum and maximum in each dimension.
+ *
+ * @param points
+ */
+function optimalBoxRotation(points: Array<IPoint2d>): number {
+    const hull = convexHull(points);
+
+
+
+    return 0;
+}

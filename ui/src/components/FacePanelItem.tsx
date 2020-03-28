@@ -1,7 +1,7 @@
 import * as React from "react";
 import {Face2d} from "../interfaces";
 import {RenderedFace} from "./RenderedFace";
-import {getWidthHeight} from "../geometry";
+import {getDistance, getWidthHeight} from "../geometry";
 import {IUnitHelper} from "../sketchup";
 
 export interface FaceProps {
@@ -19,6 +19,12 @@ export class FacePanelItem extends React.Component<FaceProps, FaceState> {
         const widthHeight = getWidthHeight(face.outerLoop);
         const width = this.lengthToStr(widthHeight[0]);
         const height = this.lengthToStr(widthHeight[1]);
+        // const longestSide = .map()
+
+        const longestSide = this.lengthToStr(face.outerLoop.map((p, i, all) => {
+            const next = i === all.length - 1 ? all[0] : all[i + 1];
+            return getDistance(p, next);
+        }).reduce((max, n) => Math.max(max, n), 0));
 
         return <div className={'face-panel-item'}>
             <RenderedFace face={face} className={'thumbnail'}/>
@@ -31,6 +37,10 @@ export class FacePanelItem extends React.Component<FaceProps, FaceState> {
                     <tr>
                         <th>Height</th>
                         <td>{height}</td>
+                    </tr>
+                    <tr>
+                        <th>Longest Side</th>
+                        <td>{longestSide}</td>
                     </tr>
                 </tbody>
             </table>

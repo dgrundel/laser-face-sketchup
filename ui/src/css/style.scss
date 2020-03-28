@@ -17,6 +17,7 @@ table {
 
     th, td {
         text-align: left;
+        vertical-align: top;
 
         &:last-child {
             text-align: right;
@@ -30,6 +31,10 @@ svg {
         fill-opacity: 0;
         stroke: #f00;
         stroke-width: 1px;
+    }
+
+    polygon.hull {
+        stroke: yellow;
     }
 
     text {
@@ -91,6 +96,7 @@ svg {
     left: 0;
 
     padding: $spacing/2;
+    overflow-y: auto;
 
     background-color: #313131;
 
