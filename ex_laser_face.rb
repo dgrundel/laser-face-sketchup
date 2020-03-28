@@ -1,4 +1,4 @@
-# Copyright 2016 Daniel Grundel
+# Copyright 2020 Daniel Grundel
 # Licensed under the MIT license
 
 require 'sketchup.rb'

@@ -11,7 +11,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, {}> {
         const onReloadButtonClick = (() => {
             app.showDialog({
                 message: "Are you sure you want to reload?\n" +
-                    "Any changes you made may be lost.",
+                    "Any changes you've made may be lost.",
                 buttonMap: {
                     "Ok": () => { window.location.reload(true); },
                     "Cancel": () => {}
