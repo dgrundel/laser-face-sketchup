@@ -1,23 +1,19 @@
 import * as React from "react";
+import {getWidthHeight} from "../geometry";
 import {Face2d} from "../interfaces";
-import {convexHull, getWidthHeight} from "../geometry";
 
 export interface RenderedFaceProps {
     className?: string;
     face: Face2d;
 }
 
-export interface RenderedFaceState {
-}
-
-export class RenderedFace extends React.Component<RenderedFaceProps, RenderedFaceState> {
+export class RenderedFace extends React.Component<RenderedFaceProps, {}> {
 
     render() {
         const face = this.props.face;
         const outerLoop = face.outerLoop;
         const otherLoops = face.otherLoops;
         const widthHeight = getWidthHeight(outerLoop);
-        const hull = convexHull(outerLoop);
 
         const viewBoxStr = '0 0 ' + widthHeight.join(' ');
 
@@ -36,11 +32,8 @@ export class RenderedFace extends React.Component<RenderedFaceProps, RenderedFac
             <svg viewBox={viewBoxStr}>
                 {[outerLoop].concat(otherLoops).map(loop => {
                     const pointStr = loop.map(p => [p.x, p.y].join(',')).join(' ');
-                    return <polygon points={pointStr} vectorEffect={'non-scaling-stroke'}/>;
+                    return <polygon key={pointStr} points={pointStr} vectorEffect={'non-scaling-stroke'}/>;
                 })}
-                <polygon className={'hull'}
-                         points={hull.map(p => [p.x, p.y].join(',')).join(' ')}
-                         vectorEffect={'non-scaling-stroke'}/>
             </svg>
         </div>;
     }

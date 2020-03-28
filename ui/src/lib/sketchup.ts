@@ -1,4 +1,4 @@
-import {Face} from "./interfaces";
+import {Face} from "../interfaces";
 
 const unitNames = ['in', 'ft', 'mm', 'cm', 'm', 'yd'];
 

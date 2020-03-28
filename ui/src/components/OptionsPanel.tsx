@@ -1,14 +1,26 @@
 import * as React from "react";
+import {App} from "./App";
 
 export interface OptionsPanelProps {
+    app: App
 }
 
-export interface OptionsPanelState {
-}
-
-export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPanelState> {
+export class OptionsPanel extends React.Component<OptionsPanelProps, {}> {
     render() {
+        const app = this.props.app;
+        const onReloadButtonClick = (() => {
+            app.showDialog({
+                message: "Are you sure you want to reload?\n" +
+                    "Any changes you made may be lost.",
+                buttonMap: {
+                    "Ok": () => { window.location.reload(true); },
+                    "Cancel": () => {}
+                }
+            })
+        });
+
         return <div id="options">
+            <button className={'block'} onClick={onReloadButtonClick}>Reload</button>
         </div>;
     }
 }

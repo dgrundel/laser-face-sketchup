@@ -1,14 +1,8 @@
 import * as React from "react";
 
-export interface SpinnerProps {
-}
-
-export interface SpinnerState {
-}
-
-export class Spinner extends React.Component<SpinnerProps, SpinnerState> {
+export class SpinnerOverlay extends React.Component<{}, {}> {
     render() {
-        return <div id="spinner-overlay">
+        return <div id="overlay">
             <div className="sk-cube-grid">
                 <div className="sk-cube sk-cube1"/>
                 <div className="sk-cube sk-cube2"/>

@@ -1,18 +1,16 @@
 import * as React from "react";
+import {getWidthHeight} from "../geometry";
 import {Face2d} from "../interfaces";
+import {lineLength, xyToGLine} from "../lib/geometric";
+import {IUnitHelper} from "../lib/sketchup";
 import {RenderedFace} from "./RenderedFace";
-import {getDistance, getWidthHeight} from "../geometry";
-import {IUnitHelper} from "../sketchup";
 
 export interface FaceProps {
     face: Face2d;
     unitHelper: IUnitHelper;
 }
 
-export interface FaceState {
-}
-
-export class FacePanelItem extends React.Component<FaceProps, FaceState> {
+export class FacePanelItem extends React.Component<FaceProps, {}> {
 
     render() {
         const face = this.props.face;
@@ -23,7 +21,7 @@ export class FacePanelItem extends React.Component<FaceProps, FaceState> {
 
         const longestSide = this.lengthToStr(face.outerLoop.map((p, i, all) => {
             const next = i === all.length - 1 ? all[0] : all[i + 1];
-            return getDistance(p, next);
+            return lineLength(xyToGLine(p, next));
         }).reduce((max, n) => Math.max(max, n), 0));
 
         return <div className={'face-panel-item'}>
