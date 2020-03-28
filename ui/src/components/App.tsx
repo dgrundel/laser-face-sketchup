@@ -9,7 +9,7 @@ import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
 import {Face, Face2d, IQuaternion} from "../interfaces";
 import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
-import {getUnitHelper, IUnitHelper, Sketchup, SketchupData} from "../lib/sketchup";
+import {getUnitHelper, IUnitHelper, Sketchup, ModelData} from "../lib/sketchup";
 
 export interface AppProps {
 }
@@ -30,24 +30,16 @@ export class App extends React.Component<AppProps, AppState> {
             loading: true
         };
 
-        ((_window: any) => _window.LaserFace = this)(window);
+        Sketchup.onSetData(this.setData.bind(this));
     }
 
     componentDidMount() {
-        setTimeout(Sketchup.getData, 0);
+        Sketchup.getData();
     }
 
-    setData(data: SketchupData) {
+    setData(data: ModelData) {
         const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
-
-        ((_w: any) => {
-            _w.LaserFace = {
-                data,
-                geometric: require('geometric')
-            };
-        })(window);
-
         const faces2d: Array<Face2d> = faces.map(f => {
             const rotation: IQuaternion = Quaternion.rotationFromTo(f.normal, Z_NORMAL);
             const outerLoop3d = f.outer_loop.map(v => rotation.rotate(v));

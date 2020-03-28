@@ -30,13 +30,63 @@ export function getUnitHelper(i: number): IUnitHelper {
     };
 }
 
-export interface ISketchup {
+interface SketchupRubyAPI {
     getData: () => {};
+    getExportPath: () => {};
 }
 
-export interface SketchupData {
+export interface ModelData {
     units: number;
     faces: Array<Face>;
 }
 
-export const Sketchup: ISketchup = ((_window: any) => _window.sketchup)(window);
+type CallbackType = 'setData' | 'setExportPath';
+
+class SketchupAPI {
+    sketchup: SketchupRubyAPI;
+    callbacks: Record<string, Array<Function>> = {};
+
+    constructor(_window: any) {
+        this.sketchup = _window.sketchup;
+        _window.sketchupConnector = this;
+    }
+
+    getData() {
+        setTimeout(this.sketchup.getData, 0);
+    }
+
+    setData(data: ModelData) {
+        this.getCallbacks('setData').forEach(fn => fn(data));
+
+    }
+
+    onSetData(fn: (data: ModelData) => void) {
+        this.addCallback('setData', fn);
+    }
+
+    getExportPath() {
+        setTimeout(this.sketchup.getExportPath, 0);
+    }
+
+    setExportPath(path: string) {
+        this.getCallbacks('setExportPath').forEach(fn => fn(path));
+    }
+
+    onSetExportPath(fn: (path: string) => void) {
+        this.addCallback('setExportPath', fn);
+    }
+
+    private addCallback(type: CallbackType, fn: Function) {
+        if (!this.callbacks.hasOwnProperty(type)) {
+            this.callbacks[type] = [fn];
+        } else {
+            this.callbacks[type].push(fn);
+        }
+    }
+
+    private getCallbacks(type: CallbackType) {
+        return this.callbacks[type] || [];
+    }
+}
+
+export const Sketchup = new SketchupAPI(window);

@@ -52,8 +52,13 @@ module Grundel
     def self.show_export_dialog
       dialog = UI::HtmlDialog.new(DIALOG_OPTIONS)
 
-      dialog.add_action_callback("getData") do |_action_context, _param1, _param2|
-        dialog.execute_script("LaserFace.setData(#{dialog_data.to_json})")
+      dialog.add_action_callback('getData') do |_action_context, _param1, _param2|
+        dialog.execute_script("sketchupConnector.setData(#{dialog_data.to_json})")
+      end
+
+      dialog.add_action_callback('getExportPath') do |_action_context, _param1, _param2|
+        path_to_save_to = UI.savepanel('Export as SVG', Dir.home, 'export.svg')
+        dialog.execute_script("sketchupConnector.setExportPath(#{path_to_save_to.to_json})")
       end
 
       dialog.set_file(DIALOG_HTML_PATH)

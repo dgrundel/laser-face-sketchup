@@ -1,6 +1,6 @@
 @import "spinner";
 
-$options-panel-width: 260px;
+$options-panel-width: 220px;
 $thumbnail-size: 160px;
 $spacing: 20px;
 $half-spacing: $spacing / 2;
@@ -22,6 +22,11 @@ body {
     color: #ddd;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
+}
+
+h1, h2, h3, h4, p {
+    margin: 0;
+    padding: 0;
 }
 
 table {
@@ -56,7 +61,7 @@ svg {
 }
 
 button {
-    margin: $spacing;
+    margin: $spacing 0;
     padding: .4em;
 
     outline: none;
@@ -82,7 +87,7 @@ button {
     }
 
     &.block {
-        width: calc(100% - #{$spacing * 2});
+        width: 100%;
     }
 }
 
@@ -152,15 +157,24 @@ button {
     top: 0;
     right: 0;
     bottom: 0;
-    width: $options-panel-width;
+    width: $options-panel-width - ($spacing * 2);
+    padding: 0 $spacing;
 
     background-color: #1c1c1c;
+
+    .options-panel-group {
+        margin: $spacing 0;
+        padding-top: $spacing;
+        border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
 
     #options-footer {
         position: absolute;
         bottom: 0;
         left: 0;
         right: 0;
+
+        padding: 0 $spacing;
 
         background-color: #292929;
     }

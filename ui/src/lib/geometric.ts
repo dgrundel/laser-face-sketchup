@@ -4,6 +4,7 @@ const geometric = require("geometric");
 
 /**
  * This file contains TypeScript bindings for geometric.js
+ *    https://github.com/HarryStevens/geometric
  *
  * ... along with a few converter function to transform data between
  * object-based points and array-based points.

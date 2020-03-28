@@ -11,11 +11,7 @@ export interface ThumbnailsProps {
 export class FacesPanel extends React.Component<ThumbnailsProps, {}> {
     render() {
         return <div id="faces">
-            {this.props.faces.map(f => <FacePanelItem key={this.getFaceKey(f)} face={f} unitHelper={this.props.unitHelper}/>)}
+            {this.props.faces.map((f, i) => <FacePanelItem key={i} face={f} unitHelper={this.props.unitHelper}/>)}
         </div>;
-    }
-
-    private getFaceKey(f: Face2d): string {
-        return f.outerLoop.map(p => `[${p.x},${p.y}]`).join(',');
     }
 }

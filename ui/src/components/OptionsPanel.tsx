@@ -1,11 +1,29 @@
 import * as React from "react";
+import {Sketchup} from "../lib/sketchup";
 import {App} from "./App";
 
 export interface OptionsPanelProps {
     app: App
 }
 
-export class OptionsPanel extends React.Component<OptionsPanelProps, {}> {
+export interface OptionsPanelState {
+    exportPath?: string
+}
+
+export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPanelState> {
+    constructor(props: OptionsPanelProps) {
+        super(props);
+        this.state = {};
+
+        Sketchup.onSetExportPath(this.setExportPath.bind(this));
+    }
+
+    setExportPath(exportPath: string) {
+        this.setState({
+            exportPath
+        });
+    }
+
     render() {
         const app = this.props.app;
         const onReloadButtonClick = (() => {
@@ -21,6 +39,13 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, {}> {
 
         return <div id="options">
             <button className={'block'} onClick={onReloadButtonClick}>Reload</button>
+
+            <div className="options-panel-group">
+                <h3>Export Path</h3>
+                <p>{this.state.exportPath}</p>
+                <button className={'block'} onClick={() => Sketchup.getExportPath()}>Choose File</button>
+            </div>
+
 
             <div id="options-footer">
                 <button className={'block primary'}>Export</button>
