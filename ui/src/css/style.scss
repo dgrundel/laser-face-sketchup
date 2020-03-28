@@ -88,6 +88,36 @@ button {
     z-index: 10000;
     background-color: #0095ff;
 
+    .overlay-dialog {
+        position: relative;
+        top: 25vh;
+        width: 50vw;
+        margin: 0 auto;
+
+        color: #fff;
+        font-size: 18px;
+        text-align: center;
+
+        .overlay-dialog-buttons {
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            margin-top: $spacing;
+        }
+
+        button {
+            min-width: 8em;
+            margin: $spacing ($spacing / 2);
+            padding-left: $spacing;
+            padding-right: $spacing;
+            background-color: #efefef;
+            color: #232323;
+            border-color: #c3c3c3;
+
+            &:hover {
+                background-color: #e1e1e1;
+            }
+        }
+    }
+
     .sk-cube-grid.sk-cube-grid {
         width: 8vh;
         height: 8vh;
