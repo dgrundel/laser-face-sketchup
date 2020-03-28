@@ -25,7 +25,7 @@ body {
 }
 
 h1, h2, h3, h4, p {
-    margin: 0;
+    margin: 0 0 $half-spacing 0;
     padding: 0;
 }
 
@@ -99,6 +99,11 @@ button {
     display: none !important;
 }
 
+.note {
+    font-size: .9em;
+    opacity: 0.7;
+    margin: $half-spacing 0;
+}
 
 #root {
     position: fixed;
