@@ -21,6 +21,10 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, {}> {
 
         return <div id="options">
             <button className={'block'} onClick={onReloadButtonClick}>Reload</button>
+
+            <div id="options-footer">
+                <button className={'block primary'}>Export</button>
+            </div>
         </div>;
     }
 }
