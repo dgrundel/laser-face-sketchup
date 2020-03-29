@@ -2,7 +2,7 @@ import * as React from "react";
 import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
 import {Face, Face2d, IQuaternion, UserPrefs} from "../interfaces";
 import {getUnitHelper, IUnitHelper, ModelData, Sketchup} from "../lib/sketchup";
-import {DialogButtonMap, DialogOverlay, DialogProps} from "./DialogOverlay";
+import {DialogButtonMap, DialogClassName, DialogOverlay, DialogProps} from "./DialogOverlay";
 import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
 import {SpinnerOverlay} from "./SpinnerOverlay";
@@ -31,8 +31,15 @@ export class App extends React.Component<AppProps, AppState> {
             loading: true
         };
 
+        this.dismissDialog = this.dismissDialog.bind(this);
+
         Sketchup.onReceiveModelData(this.receiveModelData.bind(this));
-        Sketchup.onError(s => console.error(s));
+        Sketchup.onError(s => {
+            this.showDialog({
+                message: `A plugin error occurred: ${s}`,
+                className: DialogClassName.Error
+            });
+        });
     }
 
     componentDidMount() {
@@ -60,9 +67,6 @@ export class App extends React.Component<AppProps, AppState> {
             };
         });
 
-        console.log('data.userPrefsJson', data.userPrefsJson);
-        console.log('userPrefs', userPrefs);
-
         this.setState({
             loading: false,
             userPrefs,
@@ -87,21 +91,8 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     showDialog(dialog: DialogProps) {
-        const dismiss = this.dismissDialog.bind(this);
-        const providedMap = dialog.buttonMap;
-        const map = Object.keys(providedMap).reduce((map: DialogButtonMap, text) => {
-            map[text] = () => {
-                dismiss();
-                providedMap[text]();
-            };
-            return map;
-        }, {});
-
         this.setState({
-            dialog: {
-                message: dialog.message,
-                buttonMap: map
-            }
+            dialog: dialog
         });
     }
 
@@ -111,7 +102,7 @@ export class App extends React.Component<AppProps, AppState> {
         }
 
         if (this.state.dialog) {
-            return <DialogOverlay {...this.state.dialog} />
+            return <DialogOverlay {...this.state.dialog} dismiss={this.dismissDialog} />
         }
 
         return <div>

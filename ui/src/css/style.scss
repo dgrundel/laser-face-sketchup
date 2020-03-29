@@ -127,6 +127,25 @@ button {
     z-index: 10000;
     background-color: #0095ff;
 
+    &.error {
+        background-color: #d63b2d;
+
+        .overlay-dialog:before {
+            $size: 8vh;
+            content: '\00D7';
+            position: absolute;
+            top: 0;
+            left: -1.2 * $size;
+            width: $size;
+            height: $size;
+            font-size: $size;
+            line-height: $size;
+            text-align: center;
+            background-color: rgba(255,255,255,0.15);
+            border-radius: .5vh;
+        }
+    }
+
     .overlay-dialog {
         position: relative;
         top: 25vh;
