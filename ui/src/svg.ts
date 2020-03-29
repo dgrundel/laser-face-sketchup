@@ -1,19 +1,87 @@
-/**
-<?xml version="1.0" standalone="no"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
-"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="5cm" height="4cm" version="1.1" xmlns="http://www.w3.org/2000/svg">
+import {getWidthHeight} from "./geometry";
+import {Face2d} from "./interfaces";
+import {UnitHelper} from "./lib/sketchup";
 
-    <desc>Four separate rectangles</desc>
+const XML_SERIALIZER = new XMLSerializer();
+const DOC_IMPL = document.implementation;
+const SVG_DOCTYPE = DOC_IMPL.createDocumentType(
+    'svg',
+    '-//W3C//DTD SVG 1.1//EN',
+    'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'
+);
 
-    <rect x="0.5cm" y="0.5cm" width="2cm" height="1cm"/>
-    <rect x="0.5cm" y="2cm" width="1cm" height="1.5cm"/>
-    <rect x="3cm" y="0.5cm" width="1.5cm" height="2cm"/>
-    <rect x="3.5cm" y="3cm" width="1cm" height="0.5cm"/>
+const XML_HEADER = `<?xml version="1.0" standalone="no"?>`;
 
-    <!-- Show outline of canvas using 'rect' element -->
-    <rect x=".01cm" y=".01cm" width="4.98cm" height="3.98cm"
-    fill="none" stroke="blue" stroke-width=".02cm" />
+const SVG_NS = "http://www.w3.org/2000/svg";
 
-</svg>
-*/
+function setAttributes(element: Element, attrs: Record<string, any>) {
+    Object.keys(attrs).forEach(attrName => {
+        element.setAttribute(attrName, attrs[attrName]);
+    });
+}
+
+export function faceToSvg (face: Face2d, unitHelper: UnitHelper): string {
+    const fractionDigits = 5;
+    const toS = (n: number) => n.toFixed(fractionDigits);
+    const toUnitStr = (n: any) => unitHelper.toUnitStr(unitHelper.fromInches(n), fractionDigits);
+
+    // stroke paths 0.1mm
+    const strokeWidth = toS(unitHelper.toInches(0.1));
+    const strokeColor = '#ff0000';
+
+    const outerLoop = face.outerLoop;
+    const otherLoops = face.otherLoops;
+
+    const widthHeight = getWidthHeight(outerLoop);
+
+    // width == origin to bottom right corner
+    const width = toS(widthHeight[0]);
+    const widthStr = toUnitStr(widthHeight[0]);
+    // height == origin to top left corner
+    const height = toS(widthHeight[1]);
+    const heightStr = toUnitStr(widthHeight[1]);
+
+    const doc = DOC_IMPL.createDocument(null, null, SVG_DOCTYPE);
+    const svg = doc.createElementNS(SVG_NS, 'svg');
+    setAttributes(svg, {
+        'xmlns:sodipodi': 'http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd',
+        'xmlns:inkscape': 'http://www.inkscape.org/namespaces/inkscape',
+        'version': '1.1',
+        'width': widthStr,
+        'height': heightStr,
+        'viewBox': [
+            0, // min-x
+            0, // min-y
+            width,
+            height
+        ].join(' ')
+    });
+
+    doc.appendChild(svg);
+
+    const namedView = doc.createElement('sodipodi:namedview');
+    namedView.setAttribute('inkscape:document-units', 'mm');
+    svg.appendChild(namedView);
+
+    [outerLoop].concat(otherLoops).forEach(loop => {
+        const path = doc.createElementNS(SVG_NS, 'path');
+        setAttributes(path, {
+            'd': loop.map((point, i) => {
+                const x = toS(point.x);
+                const y = toS(point.y);
+                if (i === 0) {
+                    return `M${x},${y}`;
+                }
+                return `L${x},${y}`;
+            }).join(' ') + ' Z',
+            'stroke': strokeColor,
+            'stroke-width': strokeWidth,
+            'fill': 'none'
+        });
+        svg.appendChild(path);
+    });
+
+    const xmlString = XML_SERIALIZER.serializeToString(doc);
+
+    return `${XML_HEADER}\n${xmlString}`;
+}

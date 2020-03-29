@@ -1,7 +1,7 @@
 import * as React from "react";
 import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
 import {Face, Face2d, IQuaternion, UserPrefs} from "../interfaces";
-import {getUnitHelper, IUnitHelper, ModelData, Sketchup} from "../lib/sketchup";
+import {getUnitHelper, ModelData, Sketchup, UnitHelper} from "../lib/sketchup";
 import {DialogClassName, DialogOverlay, DialogProps} from "./DialogOverlay";
 import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
@@ -19,7 +19,7 @@ export interface AppState {
     dialog?: DialogProps;
 
     userPrefs?: UserPrefs;
-    unitHelper?: IUnitHelper;
+    unitHelper?: UnitHelper;
     faces?: Array<Face>;
     faces2d?: Array<Face2d>;
 }
@@ -34,12 +34,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.dismissDialog = this.dismissDialog.bind(this);
 
         Sketchup.onReceiveModelData(this.receiveModelData.bind(this));
-        Sketchup.onError(s => {
-            this.showDialog({
-                message: `A plugin error occurred: ${s}`,
-                className: DialogClassName.Error
-            });
-        });
+        Sketchup.onError(s => this.showError(`A plugin error occurred: ${s}`));
     }
 
     componentDidMount() {
@@ -93,6 +88,13 @@ export class App extends React.Component<AppProps, AppState> {
     showDialog(dialog: DialogProps) {
         this.setState({
             dialog: dialog
+        });
+    }
+
+    showError(message: string) {
+        this.showDialog({
+            message,
+            className: DialogClassName.Error
         });
     }
 

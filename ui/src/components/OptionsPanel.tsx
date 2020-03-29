@@ -2,6 +2,7 @@ import * as React from "react";
 import {ChangeEvent} from "react";
 import {UserPrefs} from "../interfaces";
 import {Sketchup} from "../lib/sketchup";
+import {faceToSvg} from "../svg";
 import {App} from "./App";
 
 export interface OptionsPanelProps {
@@ -31,6 +32,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         this.reloadWindow = this.reloadWindow.bind(this);
         this.onMultiFileOptionChange = this.onMultiFileOptionChange.bind(this);
         this.onOverwriteExistingChange = this.onOverwriteExistingChange.bind(this);
+        this.doExport = this.doExport.bind(this);
     }
 
     /**
@@ -88,6 +90,26 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         }));
     }
 
+    doExport() {
+        const app = this.props.app;
+        const exportPath = this.state.exportPath;
+        if (!exportPath) {
+            app.showError("No export file selected.");
+            return;
+        }
+
+        const overwrite = this.state.overwriteFiles;
+        const faces2d = app.state.faces2d;
+        const unitHelper = app.state.unitHelper;
+        const svgStr = faceToSvg(faces2d[0], unitHelper);
+
+        Sketchup.writeFile(exportPath, svgStr, overwrite);
+
+        app.showDialog({
+            message: 'Done?'
+        });
+    }
+
     render() {
         return <div id="options">
             <button className={'block'} onClick={this.reloadWindow}>Reload</button>
@@ -137,7 +159,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
             </div>
 
             <div id="options-footer">
-                <button className={'block primary'}>Export</button>
+                <button className={'block primary'} onClick={this.doExport}>Export</button>
             </div>
         </div>;
     }

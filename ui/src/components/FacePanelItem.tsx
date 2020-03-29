@@ -2,12 +2,12 @@ import * as React from "react";
 import {getWidthHeight} from "../geometry";
 import {Face2d} from "../interfaces";
 import {lineLength, xyToGLine} from "../lib/geometric";
-import {IUnitHelper} from "../lib/sketchup";
+import {UnitHelper} from "../lib/sketchup";
 import {RenderedFace} from "./RenderedFace";
 
 export interface FaceProps {
     face: Face2d;
-    unitHelper: IUnitHelper;
+    unitHelper: UnitHelper;
 }
 
 export class FacePanelItem extends React.Component<FaceProps, {}> {

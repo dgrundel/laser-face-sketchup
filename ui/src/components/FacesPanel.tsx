@@ -1,11 +1,11 @@
 import * as React from "react";
 import {Face2d} from "../interfaces";
+import {UnitHelper} from "../lib/sketchup";
 import {FacePanelItem} from "./FacePanelItem";
-import {IUnitHelper} from "../lib/sketchup";
 
 export interface ThumbnailsProps {
     faces: Array<Face2d>;
-    unitHelper: IUnitHelper;
+    unitHelper: UnitHelper;
 }
 
 export class FacesPanel extends React.Component<ThumbnailsProps, {}> {

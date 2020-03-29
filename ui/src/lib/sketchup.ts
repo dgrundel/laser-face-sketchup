@@ -6,31 +6,54 @@ const SAVE_USER_PREFS_THROTTLE = 500;
 const UNIT_NAMES = ['in', 'ft', 'mm', 'cm', 'm', 'yd'];
 
 // convert from inches, which Sketchup uses internally
-const UNIT_CONVERTERS: Array<(n: number) => number> = [
-    // 'in'
-    n => n,
-    // 'ft',
-    n => n/12.0,
-    // 'mm',
-    n => n*25.4,
-    // 'cm',
-    n => n*2.54,
-    // 'm',
-    n => n*0.0254,
-    // 'yd'
-    n => n/36.0
+const CONVERT_FROM_INCHES: Array<(n: number) => number> = [
+    n => n, // 'in'
+    n => n/12.0, // 'ft',
+    n => n*25.4, // 'mm',
+    n => n*2.54, // 'cm',
+    n => n*0.0254, // 'm',
+    n => n/36.0 // 'yd'
 ];
 
-export interface IUnitHelper {
-    name: string,
-    fromInches: (n: number) => number;
+const CONVERT_TO_INCHES: Array<(n: number) => number> = [
+    n => n, // 'in'
+    n => n*12.0, // 'ft',
+    n => n/25.4, // 'mm',
+    n => n/2.54, // 'cm',
+    n => n/0.0254, // 'm',
+    n => n*36.0 // 'yd'
+];
+
+export function getUnitHelper(i: number): UnitHelper {
+    return new UnitHelper(
+        UNIT_NAMES[i],
+        CONVERT_FROM_INCHES[i],
+        CONVERT_TO_INCHES[i]
+    );
 }
 
-export function getUnitHelper(i: number): IUnitHelper {
-    return {
-        name: UNIT_NAMES[i],
-        fromInches: UNIT_CONVERTERS[i]
-    };
+export class UnitHelper {
+    name: string;
+    from_in: (n: number) => number;
+    to_in: (n: number) => number;
+
+    constructor(name: string, from_in: (n: number) => number, to_in: (n: number) => number) {
+        this.name = name;
+        this.from_in = from_in;
+        this.to_in = to_in;
+    }
+
+    fromInches(n: number) {
+        return this.from_in(n);
+    }
+
+    toUnitStr(n: number, fractionDigits = 3) {
+        return n.toFixed(fractionDigits) + this.name;
+    }
+
+    toInches(n: number) {
+        return this.to_in(n);
+    }
 }
 
 interface SketchupRubyAPI {
@@ -97,6 +120,10 @@ class SketchupAPI {
     saveUserPrefs(userPrefs: UserPrefs): void {
         const jsonStr = JSON.stringify(userPrefs, null, 4);
         setTimeout(() => this.sketchup.saveUserPrefs(jsonStr), 0);
+    }
+
+    writeFile(path: string, contents: string, overwrite = false) {
+        setTimeout(() => this.sketchup.writeFile(path, contents, overwrite), 0);
     }
 
     private addCallback(type: CallbackType, fn: Function) {
