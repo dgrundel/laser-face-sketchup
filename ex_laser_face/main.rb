@@ -34,21 +34,36 @@ module Grundel
       end.map(&method(:loop_vertices))
     end
 
+    def self.send_error_to_dialog(dialog, message)
+      dialog.execute_script("sketchupConnector.receiveError(#{message.to_json})")
+    end
+
+    def self.write_file(dialog, contents, file_path, overwrite)
+      if File.exist?(file_path) && File.directory?(file_path)
+        send_error_to_dialog(dialog, "File #{file_path} is a directory.")
+      elsif File.exist?(file_path) && !overwrite
+        send_error_to_dialog(dialog, "File #{file_path} already exists.")
+      elsif File.exist?(file_path) && !File.writable?(file_path)
+        send_error_to_dialog(dialog, "File #{file_path} is not writable.")
+      else
+        File.write(file_path, contents)
+      end
+    rescue StandardError => e
+      send_error_to_dialog(dialog, e.message)
+    end
 
     def self.show_export_dialog
       dialog = UI::HtmlDialog.new(DIALOG_OPTIONS)
 
-      dialog.add_action_callback('saveUserPrefs') do |_action_context, prefs_json, _param2|
-        begin
-          if (File.file?(USER_PREFS_FILE_PATH) && File.writable?(USER_PREFS_FILE_PATH)) || !File.exist?(USER_PREFS_FILE_PATH)
-            File.write(USER_PREFS_FILE_PATH, prefs_json)
-          end
-        rescue StandardError => e
-          dialog.execute_script("sketchupConnector.receiveError(#{e.message.to_json})")
-        end
+      dialog.add_action_callback('writeFile') do |_action_context, file_path, file_contents, overwrite|
+        write_file(dialog, file_contents, file_path, overwrite)
       end
 
-      dialog.add_action_callback('getData') do |_action_context, _param1, _param2|
+      dialog.add_action_callback('saveUserPrefs') do |_action_context, prefs_json|
+        write_file(dialog, prefs_json, USER_PREFS_FILE_PATH, true)
+      end
+
+      dialog.add_action_callback('getData') do |_action_context|
         model_units = Sketchup.active_model.options['UnitsOptions']['LengthUnit']
         selected_faces = Sketchup.active_model.selection.grep(Sketchup::Face)
         user_prefs_json = '{}'
@@ -57,7 +72,7 @@ module Grundel
             user_prefs_json = File.read(USER_PREFS_FILE_PATH)
           end
         rescue StandardError => e
-          dialog.execute_script("sketchupConnector.receiveError(#{e.message.to_json})")
+          send_error_to_dialog(dialog, e.message)
           user_prefs_json = '{}'
         end
 
@@ -75,7 +90,7 @@ module Grundel
         dialog.execute_script("sketchupConnector.receiveModelData(#{dialog_data_value.to_json})")
       end
 
-      dialog.add_action_callback('getExportPath') do |_action_context, _param1, _param2|
+      dialog.add_action_callback('getExportPath') do |_action_context|
         path_to_save_to = UI.savepanel('Export as SVG', Dir.home, 'export.svg')
         dialog.execute_script("sketchupConnector.receiveExportPath(#{path_to_save_to.to_json})")
       end

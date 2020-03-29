@@ -34,10 +34,11 @@ export function getUnitHelper(i: number): IUnitHelper {
 }
 
 interface SketchupRubyAPI {
-    getData: () => {};
-    getExportPath: () => {};
-    getUserPrefs: () => {};
-    saveUserPrefs: (jsonStr: string) => {};
+    getData: () => void;
+    getExportPath: () => void;
+    getUserPrefs: () => void;
+    saveUserPrefs: (jsonStr: string) => void;
+    writeFile: (path: string, contents: string, overwrite: boolean) => void;
 }
 
 export interface ModelData {

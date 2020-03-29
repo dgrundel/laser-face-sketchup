@@ -2,7 +2,7 @@ import * as React from "react";
 import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
 import {Face, Face2d, IQuaternion, UserPrefs} from "../interfaces";
 import {getUnitHelper, IUnitHelper, ModelData, Sketchup} from "../lib/sketchup";
-import {DialogButtonMap, DialogClassName, DialogOverlay, DialogProps} from "./DialogOverlay";
+import {DialogClassName, DialogOverlay, DialogProps} from "./DialogOverlay";
 import {FacesPanel} from "./FacesPanel";
 import {OptionsPanel} from "./OptionsPanel";
 import {SpinnerOverlay} from "./SpinnerOverlay";
