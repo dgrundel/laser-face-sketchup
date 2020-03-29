@@ -28,6 +28,7 @@
     "alfador": "^0.6.1",
     "geometric": "^2.2.1",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "throttle-debounce": "^2.1.0"
   }
 }

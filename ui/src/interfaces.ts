@@ -32,6 +32,5 @@ export interface IPoint2d {
 export interface UserPrefs {
     lastExportPath?: string
     useMultiFile?: boolean
-
-    [key: string]: any;
+    overwriteFiles?: boolean
 }

@@ -1,9 +1,12 @@
+// @ts-ignore
+import {throttle} from 'throttle-debounce';
 import {Face, UserPrefs} from "../interfaces";
 
-const unitNames = ['in', 'ft', 'mm', 'cm', 'm', 'yd'];
+const SAVE_USER_PREFS_THROTTLE = 500;
+const UNIT_NAMES = ['in', 'ft', 'mm', 'cm', 'm', 'yd'];
 
 // convert from inches, which Sketchup uses internally
-const unitConverters: Array<(n: number) => number> = [
+const UNIT_CONVERTERS: Array<(n: number) => number> = [
     // 'in'
     n => n,
     // 'ft',
@@ -25,8 +28,8 @@ export interface IUnitHelper {
 
 export function getUnitHelper(i: number): IUnitHelper {
     return {
-        name: unitNames[i],
-        fromInches: unitConverters[i]
+        name: UNIT_NAMES[i],
+        fromInches: UNIT_CONVERTERS[i]
     };
 }
 
@@ -52,6 +55,10 @@ class SketchupAPI {
     constructor(_window: any) {
         this.sketchup = _window.sketchup;
         _window.sketchupConnector = this;
+
+        this.saveUserPrefs = throttle(
+            SAVE_USER_PREFS_THROTTLE, false, this.saveUserPrefs.bind(this)
+        ) as (userPrefs: UserPrefs) => void;
     }
 
     receiveError(message: string) {
@@ -86,7 +93,7 @@ class SketchupAPI {
         this.addCallback('receiveExportPath', fn);
     }
 
-    saveUserPrefs(userPrefs: UserPrefs) {
+    saveUserPrefs(userPrefs: UserPrefs): void {
         const jsonStr = JSON.stringify(userPrefs, null, 4);
         setTimeout(() => this.sketchup.saveUserPrefs(jsonStr), 0);
     }
