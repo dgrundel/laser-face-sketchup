@@ -1,15 +1,15 @@
 import * as React from "react";
+import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
+import {Face, Face2d, IQuaternion, UserPrefs} from "../interfaces";
+import {getUnitHelper, IUnitHelper, ModelData, Sketchup} from "../lib/sketchup";
 import {DialogButtonMap, DialogOverlay, DialogProps} from "./DialogOverlay";
+import {FacesPanel} from "./FacesPanel";
+import {OptionsPanel} from "./OptionsPanel";
+import {SpinnerOverlay} from "./SpinnerOverlay";
+
 const Alfador = require("alfador");
 const Quaternion = Alfador.Quaternion;
 
-
-import {SpinnerOverlay} from "./SpinnerOverlay";
-import {FacesPanel} from "./FacesPanel";
-import {OptionsPanel} from "./OptionsPanel";
-import {Face, Face2d, IQuaternion} from "../interfaces";
-import {createOffsetter, rotatePointsToSmallestBox, rotatePolygon, Z_NORMAL} from "../geometry";
-import {getUnitHelper, IUnitHelper, Sketchup, ModelData} from "../lib/sketchup";
 
 export interface AppProps {
 }
@@ -18,6 +18,7 @@ export interface AppState {
     loading: boolean;
     dialog?: DialogProps;
 
+    userPrefs?: UserPrefs;
     unitHelper?: IUnitHelper;
     faces?: Array<Face>;
     faces2d?: Array<Face2d>;
@@ -30,14 +31,16 @@ export class App extends React.Component<AppProps, AppState> {
             loading: true
         };
 
-        Sketchup.onSetData(this.setData.bind(this));
+        Sketchup.onReceiveModelData(this.receiveModelData.bind(this));
+        Sketchup.onError(s => console.error(s));
     }
 
     componentDidMount() {
-        Sketchup.getData();
+        Sketchup.getModelData();
     }
 
-    setData(data: ModelData) {
+    receiveModelData(data: ModelData) {
+        const userPrefs = JSON.parse(data.userPrefsJson) as UserPrefs;
         const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
         const faces2d: Array<Face2d> = faces.map(f => {
@@ -57,13 +60,23 @@ export class App extends React.Component<AppProps, AppState> {
             };
         });
 
-
+        console.log('data.userPrefsJson', data.userPrefsJson);
+        console.log('userPrefs', userPrefs);
 
         this.setState({
             loading: false,
+            userPrefs,
             unitHelper,
             faces,
             faces2d
+        });
+    }
+
+    updatePreferences(updater: (prefs: UserPrefs) => UserPrefs) {
+        const newPrefs = updater(this.state.userPrefs);
+        Sketchup.saveUserPrefs(newPrefs);
+        this.setState({
+            userPrefs: newPrefs
         });
     }
 

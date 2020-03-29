@@ -1,8 +1,10 @@
+# frozen_string_literal: true
 require 'sketchup.rb'
 
 module Grundel
   module LaserFace
 
+    USER_PREFS_FILE_PATH = File.absolute_path('.laser_face_prefs.json', Dir.home)
     DIALOG_HTML_PATH = File.expand_path('../ui/dist/index.html', File.dirname(__FILE__))
     DIALOG_OPTIONS = {
       dialog_title: 'LaserFace',
@@ -33,32 +35,49 @@ module Grundel
     end
 
 
-    def self.dialog_data
-      model_units = Sketchup.active_model.options['UnitsOptions']['LengthUnit']
-      selected_faces = Sketchup.active_model.selection.grep(Sketchup::Face)
-
-      {
-        units: model_units,
-        faces: selected_faces.map do |f|
-          {
-            normal: f.normal.to_a,
-            outer_loop: loop_vertices(f.outer_loop),
-            other_loops: outer_loop_vertices(f)
-          }
-        end
-      }
-    end
-
     def self.show_export_dialog
       dialog = UI::HtmlDialog.new(DIALOG_OPTIONS)
 
+      dialog.add_action_callback('saveUserPrefs') do |_action_context, prefs_json, _param2|
+        begin
+          if (File.file?(USER_PREFS_FILE_PATH) && File.writable?(USER_PREFS_FILE_PATH)) || !File.exist?(USER_PREFS_FILE_PATH)
+            File.write(USER_PREFS_FILE_PATH, prefs_json)
+          end
+        rescue StandardError => e
+          dialog.execute_script("sketchupConnector.receiveError(#{e.message.to_json})")
+        end
+      end
+
       dialog.add_action_callback('getData') do |_action_context, _param1, _param2|
-        dialog.execute_script("sketchupConnector.setData(#{dialog_data.to_json})")
+        model_units = Sketchup.active_model.options['UnitsOptions']['LengthUnit']
+        selected_faces = Sketchup.active_model.selection.grep(Sketchup::Face)
+        user_prefs_json = '{}'
+        begin
+          if File.file?(USER_PREFS_FILE_PATH) && File.readable?(USER_PREFS_FILE_PATH)
+            user_prefs_json = File.read(USER_PREFS_FILE_PATH)
+          end
+        rescue StandardError => e
+          dialog.execute_script("sketchupConnector.receiveError(#{e.message.to_json})")
+          user_prefs_json = '{}'
+        end
+
+        dialog_data_value = {
+          userPrefsJson: user_prefs_json,
+          units: model_units,
+          faces: selected_faces.map do |f|
+            {
+                normal: f.normal.to_a,
+                outer_loop: loop_vertices(f.outer_loop),
+                other_loops: outer_loop_vertices(f)
+            }
+          end
+        }
+        dialog.execute_script("sketchupConnector.receiveModelData(#{dialog_data_value.to_json})")
       end
 
       dialog.add_action_callback('getExportPath') do |_action_context, _param1, _param2|
         path_to_save_to = UI.savepanel('Export as SVG', Dir.home, 'export.svg')
-        dialog.execute_script("sketchupConnector.setExportPath(#{path_to_save_to.to_json})")
+        dialog.execute_script("sketchupConnector.receiveExportPath(#{path_to_save_to.to_json})")
       end
 
       dialog.set_file(DIALOG_HTML_PATH)

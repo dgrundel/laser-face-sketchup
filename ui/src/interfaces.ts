@@ -29,4 +29,9 @@ export interface IPoint2d {
     y: number
 }
 
+export interface UserPrefs {
+    lastExportPath?: string
+    useMultiFile?: boolean
 
+    [key: string]: any;
+}

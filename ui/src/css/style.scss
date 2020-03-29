@@ -105,6 +105,10 @@ button {
     margin: $half-spacing 0;
 }
 
+.break {
+    word-break: break-all;
+}
+
 #root {
     position: fixed;
     top: 0;
