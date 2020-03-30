@@ -2,7 +2,7 @@ import * as React from "react";
 import {ChangeEvent} from "react";
 import {UserPrefs} from "../interfaces";
 import {Sketchup} from "../lib/sketchup";
-import {faceToSvg} from "../svg";
+import {SvgBuilder} from "../svg";
 import {App} from "./App";
 
 export interface OptionsPanelProps {
@@ -98,12 +98,15 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
             return;
         }
 
+        // const useMultiFile = this.state.useMultiFile;
         const overwrite = this.state.overwriteFiles;
         const faces2d = app.state.faces2d;
         const unitHelper = app.state.unitHelper;
-        const svgStr = faceToSvg(faces2d[0], unitHelper);
 
-        Sketchup.writeFile(exportPath, svgStr, overwrite);
+        // all in a single file
+        const builder = new SvgBuilder(unitHelper);
+        faces2d.forEach(f => builder.addFace(f));
+        Sketchup.writeFile(exportPath, builder.toXml(), overwrite);
 
         app.showDialog({
             message: 'Done?'
