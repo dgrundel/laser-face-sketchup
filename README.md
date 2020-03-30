@@ -1,3 +1,5 @@
 # LASERFACE
 
-At some point this will export selected faces as SVG files for laser cutting.
+A pretty straightforward Sketchup plugin to export selected faces into SVG files. I use it for laser cutting.
+
+![LASERFACE](docs/LASERFACE.jpg)

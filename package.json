@@ -1,7 +1,7 @@
 {
-  "name": "laserface-ui",
-  "version": "1.0.0",
-  "description": "HTML UI for LaserFace plugin",
+  "name": "laserface",
+  "version": "0.1.0",
+  "description": "LaserFace Sketchup Plugin",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
