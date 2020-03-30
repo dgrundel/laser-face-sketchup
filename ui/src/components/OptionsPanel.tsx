@@ -3,6 +3,7 @@ import {ChangeEvent} from "react";
 import {UserPrefs} from "../interfaces";
 import {Sketchup} from "../lib/sketchup";
 import {SvgBuilder} from "../svg";
+import {plural} from "../util";
 import {App} from "./App";
 import {DialogClassName} from "./DialogOverlay";
 
@@ -108,12 +109,12 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
     onExportComplete (successes: Array<string>, failures: Array<string>) {
         const app = this.props.app;
         if (failures.length === 0) {
-            const message = `Saved ${successes.length} files successfully: \n`
+            const message = `Saved ${successes.length} ${plural(successes.length, 'file', 'files')} successfully: \n`
                 + successes.join(', \n');
             app.showMessage(message, DialogClassName.Success);
         } else {
-            const message = `Saved ${successes.length} files successfully, 
-                        failed to save ${failures.length} files: \n`
+            const message = `Saved ${successes.length} ${plural(successes.length, 'file', 'files')} successfully, 
+                        failed to save ${failures.length} ${plural(failures.length, 'file', 'files')}: \n`
                 + failures.join(', \n');
             app.showMessage(message, DialogClassName.Error);
         }
