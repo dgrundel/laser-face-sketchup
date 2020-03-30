@@ -4,10 +4,11 @@ $options-panel-width: 220px;
 $thumbnail-size: 160px;
 $spacing: 20px;
 $half-spacing: $spacing / 2;
+$scrollbar-size: 6px;
 
 ::-webkit-scrollbar {
-    height: $half-spacing;
-    width: $half-spacing;
+    height: $scrollbar-size;
+    width: $scrollbar-size;
     background: transparent;
 }
 
@@ -142,6 +143,10 @@ button {
         border-radius: .5vh;
     }
 
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
     &.error {
         background-color: #d63b2d;
 
@@ -167,6 +172,15 @@ button {
         color: #fff;
         font-size: 18px;
         text-align: center;
+
+        .overlay-dialog-message {
+            max-height: 50vh;
+            overflow-y: auto;
+
+            p {
+                margin-bottom: .1em;
+            }
+        }
 
         .overlay-dialog-buttons {
             border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -228,7 +242,7 @@ button {
     left: 0;
 
     // scroll bar adds 10px on the right
-    padding: $half-spacing 0 $half-spacing $half-spacing;
+    padding: $half-spacing ($half-spacing - $scrollbar-size) $half-spacing $half-spacing;
     overflow-y: scroll;
 
     background-color: #313131;

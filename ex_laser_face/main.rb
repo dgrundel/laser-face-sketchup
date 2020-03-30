@@ -92,13 +92,14 @@ module Grundel
         end
 
         dialog_data_value = {
+          fileSeparators: [File::SEPARATOR, File::ALT_SEPARATOR],
           userPrefsJson: user_prefs_json,
           units: model_units,
           faces: selected_faces.map do |f|
             {
-                normal: f.normal.to_a,
-                outer_loop: loop_vertices(f.outer_loop),
-                other_loops: outer_loop_vertices(f)
+              normal: f.normal.to_a,
+              outer_loop: loop_vertices(f.outer_loop),
+              other_loops: outer_loop_vertices(f)
             }
           end
         }

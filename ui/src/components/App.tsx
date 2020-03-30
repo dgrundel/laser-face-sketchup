@@ -18,6 +18,7 @@ export interface AppState {
     loading: boolean;
     dialog?: DialogProps;
 
+    fileSeparators?: Array<string>;
     userPrefs?: UserPrefs;
     unitHelper?: UnitHelper;
     faces?: Array<Face>;
@@ -42,6 +43,7 @@ export class App extends React.Component<AppProps, AppState> {
     }
 
     receiveModelData(data: ModelData) {
+        const fileSeparators = data.fileSeparators;
         const userPrefs = JSON.parse(data.userPrefsJson) as UserPrefs;
         const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
@@ -64,10 +66,17 @@ export class App extends React.Component<AppProps, AppState> {
 
         this.setState({
             loading: false,
+            fileSeparators,
             userPrefs,
             unitHelper,
             faces,
             faces2d
+        });
+    }
+
+    setLoading(isLoading: boolean) {
+        this.setState({
+            loading: isLoading
         });
     }
 
@@ -87,6 +96,7 @@ export class App extends React.Component<AppProps, AppState> {
 
     showDialog(dialog: DialogProps) {
         this.setState({
+            loading: false,
             dialog: dialog
         });
     }

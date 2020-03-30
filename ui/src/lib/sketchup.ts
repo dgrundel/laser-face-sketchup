@@ -66,6 +66,7 @@ interface SketchupRubyAPI {
 }
 
 export interface ModelData {
+    fileSeparators: Array<string>;
     userPrefsJson: string;
     units: number;
     faces: Array<Face>;

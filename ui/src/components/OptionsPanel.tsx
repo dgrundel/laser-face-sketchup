@@ -6,6 +6,8 @@ import {SvgBuilder} from "../svg";
 import {App} from "./App";
 import {DialogClassName} from "./DialogOverlay";
 
+const FILE_EXT_SEPARATOR = '.';
+
 export interface OptionsPanelProps {
     app: App;
 }
@@ -14,6 +16,17 @@ export interface OptionsPanelState {
     exportPath?: string;
     useMultiFile: boolean;
     overwriteFiles: boolean;
+}
+
+/**
+ * For each outcome object, a status string is present.
+ * If the status is fulfilled, then a value is present.
+ * If the status is rejected, then a reason is present.
+ */
+interface PromiseOutcome {
+    status: 'fulfilled' | 'rejected';
+    value?: any;
+    reason?: any;
 }
 
 export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPanelState> {
@@ -33,6 +46,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         this.reloadWindow = this.reloadWindow.bind(this);
         this.onMultiFileOptionChange = this.onMultiFileOptionChange.bind(this);
         this.onOverwriteExistingChange = this.onOverwriteExistingChange.bind(this);
+        this.onExportComplete = this.onExportComplete.bind(this);
         this.doExport = this.doExport.bind(this);
     }
 
@@ -91,6 +105,20 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         }));
     }
 
+    onExportComplete (successes: Array<string>, failures: Array<string>) {
+        const app = this.props.app;
+        if (failures.length === 0) {
+            const message = `Saved ${successes.length} files successfully: \n`
+                + successes.join(', \n');
+            app.showMessage(message, DialogClassName.Success);
+        } else {
+            const message = `Saved ${successes.length} files successfully, 
+                        failed to save ${failures.length} files: \n`
+                + failures.join(', \n');
+            app.showMessage(message, DialogClassName.Error);
+        }
+    }
+
     doExport() {
         const app = this.props.app;
         const exportPath = this.state.exportPath;
@@ -99,19 +127,72 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
             return;
         }
 
-        // const useMultiFile = this.state.useMultiFile;
         const overwrite = this.state.overwriteFiles;
         const faces2d = app.state.faces2d;
         const unitHelper = app.state.unitHelper;
+        const useMultiFile = this.state.useMultiFile;
 
-        // all in a single file
-        const builder = new SvgBuilder(unitHelper);
-        faces2d.forEach(f => builder.addFace(f));
-        Sketchup.writeFile(exportPath, builder.toXml(), overwrite, ((ok, message?) => {
-            if (message) {
-                app.showMessage(message, ok ? DialogClassName.Success : DialogClassName.Error);
+        app.setLoading(true);
+
+        // do all this work after we've had a chance to show the spinner
+        setTimeout(() => {
+            if (useMultiFile) {
+                const fileSeparators = app.state.fileSeparators;
+                const splitPath = this.splitFilePath(exportPath, fileSeparators);
+                // after the splice operation, splitPath contains only the folder path
+                const fullFileName = splitPath.splice(splitPath.length - 1, 1)[0];
+                const extIndex = fullFileName.lastIndexOf(FILE_EXT_SEPARATOR);
+                const fileName = fullFileName.substring(0, extIndex);
+                const ext = fullFileName.substring(extIndex);
+
+                // would love to use Promise.allSettled here, but not available
+                // in the old version of Chrome that Sketchup 2017 is using.
+                let remainingFiles = faces2d.length;
+                const successes: Array<string> = [];
+                const failures: Array<string> = [];
+
+                faces2d.forEach((face, i) => {
+                    const fileNum = i + 1;
+
+                    const faceFileName = `${fileName}-${fileNum}${ext}`;
+                    const faceFilePath = splitPath.concat(faceFileName).join(fileSeparators[0]);
+
+                    const builder = new SvgBuilder(unitHelper);
+                    builder.addFace(face);
+                    const xml = builder.toXml();
+                    Sketchup.writeFile(faceFilePath, xml, overwrite, ((ok, message?) => {
+                        remainingFiles--;
+                        if (ok) {
+                            successes.push(faceFilePath);
+                        } else {
+                            failures.push(`Failed to save ${faceFilePath}: ${message}`);
+                        }
+
+                        if (remainingFiles === 0) {
+                            this.onExportComplete(successes, failures);
+                        }
+                    }));
+                });
+
+            } else {
+                // all in a single file
+                const builder = new SvgBuilder(unitHelper);
+                faces2d.forEach(f => builder.addFace(f));
+                Sketchup.writeFile(exportPath, builder.toXml(), overwrite, ((ok) => {
+                    const successes = ok ? [exportPath] : [];
+                    const failures = ok ? [] : [exportPath];
+                    this.onExportComplete(successes, failures);
+                }));
             }
-        }));
+        }, 0);
+    }
+
+    private splitFilePath(path: string, fileSeparators: Array<string>) {
+        return fileSeparators.reduce((pathParts, sep) => {
+            return pathParts.reduce((parts, part) => {
+                return parts.concat(part.split(sep));
+            }, []);
+        }, [path]);
     }
 
     render() {
