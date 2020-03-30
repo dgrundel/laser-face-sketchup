@@ -35,32 +35,47 @@ module Grundel
     end
 
     def self.send_error_to_dialog(dialog, message)
-      dialog.execute_script("sketchupConnector.receiveError(#{message.to_json})")
+      dialog.execute_script("sketchupConnector.receiveMessage(#{message.to_json}, 'error')")
     end
 
-    def self.write_file(dialog, contents, file_path, overwrite)
+    def self.send_success_to_dialog(dialog, message)
+      dialog.execute_script("sketchupConnector.receiveMessage(#{message.to_json}, 'success')")
+    end
+
+    def self.send_api_response_to_dialog(dialog, id, ok, message)
+      dialog.execute_script("sketchupConnector.receiveAPIResponse(#{id}, #{ok},  #{message.to_json})")
+    end
+
+    def self.write_file(contents, file_path, overwrite)
       if File.exist?(file_path) && File.directory?(file_path)
-        send_error_to_dialog(dialog, "File #{file_path} is a directory.")
+        raise "File #{file_path} is a directory."
       elsif File.exist?(file_path) && !overwrite
-        send_error_to_dialog(dialog, "File #{file_path} already exists.")
+        raise "File #{file_path} already exists."
       elsif File.exist?(file_path) && !File.writable?(file_path)
-        send_error_to_dialog(dialog, "File #{file_path} is not writable.")
+        raise "File #{file_path} is not writable."
       else
         File.write(file_path, contents)
       end
-    rescue StandardError => e
-      send_error_to_dialog(dialog, e.message)
     end
 
     def self.show_export_dialog
       dialog = UI::HtmlDialog.new(DIALOG_OPTIONS)
 
-      dialog.add_action_callback('writeFile') do |_action_context, file_path, file_contents, overwrite|
-        write_file(dialog, file_contents, file_path, overwrite)
+      dialog.add_action_callback('writeFile') do |_action_context, id, file_path, file_contents, overwrite|
+        begin
+          write_file(file_contents, file_path, overwrite)
+          send_api_response_to_dialog(dialog, id, true, "#{file_path} written successfully.")
+        rescue StandardError => e
+          send_api_response_to_dialog(dialog, id, false, e.message)
+        end
       end
 
       dialog.add_action_callback('saveUserPrefs') do |_action_context, prefs_json|
-        write_file(dialog, prefs_json, USER_PREFS_FILE_PATH, true)
+        begin
+          write_file(prefs_json, USER_PREFS_FILE_PATH, true)
+        rescue StandardError => e
+          send_error_to_dialog(dialog, e.message)
+        end
       end
 
       dialog.add_action_callback('getData') do |_action_context|

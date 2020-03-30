@@ -4,6 +4,7 @@ import {UserPrefs} from "../interfaces";
 import {Sketchup} from "../lib/sketchup";
 import {SvgBuilder} from "../svg";
 import {App} from "./App";
+import {DialogClassName} from "./DialogOverlay";
 
 export interface OptionsPanelProps {
     app: App;
@@ -94,7 +95,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         const app = this.props.app;
         const exportPath = this.state.exportPath;
         if (!exportPath) {
-            app.showError("No export file selected.");
+            app.showMessage("No export file selected.", DialogClassName.Error);
             return;
         }
 
@@ -106,11 +107,11 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         // all in a single file
         const builder = new SvgBuilder(unitHelper);
         faces2d.forEach(f => builder.addFace(f));
-        Sketchup.writeFile(exportPath, builder.toXml(), overwrite);
-
-        app.showDialog({
-            message: 'Done?'
-        });
+        Sketchup.writeFile(exportPath, builder.toXml(), overwrite, ((ok, message?) => {
+            if (message) {
+                app.showMessage(message, ok ? DialogClassName.Success : DialogClassName.Error);
+            }
+        }));
     }
 
     render() {

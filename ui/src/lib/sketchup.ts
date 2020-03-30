@@ -1,5 +1,6 @@
 // @ts-ignore
 import {throttle} from 'throttle-debounce';
+import {DialogClassName} from "../components/DialogOverlay";
 import {Face, UserPrefs} from "../interfaces";
 
 const SAVE_USER_PREFS_THROTTLE = 500;
@@ -61,7 +62,7 @@ interface SketchupRubyAPI {
     getExportPath: () => void;
     getUserPrefs: () => void;
     saveUserPrefs: (jsonStr: string) => void;
-    writeFile: (path: string, contents: string, overwrite: boolean) => void;
+    writeFile: (id: number, path: string, contents: string, overwrite: boolean) => void;
 }
 
 export interface ModelData {
@@ -70,11 +71,15 @@ export interface ModelData {
     faces: Array<Face>;
 }
 
-type CallbackType = 'error' | 'receiveModelData' | 'receiveExportPath';
+type CallbackType = 'message' | 'receiveModelData' | 'receiveExportPath';
+type APIResponseHandler = (ok: boolean, message?: string) => void;
 
 class SketchupAPI {
     sketchup: SketchupRubyAPI;
     callbacks: Record<string, Array<Function>> = {};
+
+    responseQueue: Record<number, APIResponseHandler> = {};
+    callId = 0;
 
     constructor(_window: any) {
         this.sketchup = _window.sketchup;
@@ -85,12 +90,20 @@ class SketchupAPI {
         ) as (userPrefs: UserPrefs) => void;
     }
 
-    receiveError(message: string) {
-        this.getCallbacks('error').forEach(fn => fn(message));
+    receiveAPIResponse(id: number, ok: boolean, message?: string) {
+        if (this.responseQueue.hasOwnProperty(id)) {
+            const callback = this.responseQueue[id];
+            delete this.responseQueue[id];
+            callback(ok, message);
+        }
     }
 
-    onError(fn: (message: string) => void) {
-        this.addCallback('error', fn);
+    receiveMessage(message: string, className?: DialogClassName) {
+        this.getCallbacks('message').forEach(fn => fn(message, className));
+    }
+
+    onMessage(fn: (message: string, className?: DialogClassName) => void) {
+        this.addCallback('message', fn);
     }
 
     getModelData() {
@@ -122,8 +135,15 @@ class SketchupAPI {
         setTimeout(() => this.sketchup.saveUserPrefs(jsonStr), 0);
     }
 
-    writeFile(path: string, contents: string, overwrite = false) {
-        setTimeout(() => this.sketchup.writeFile(path, contents, overwrite), 0);
+    writeFile(path: string, contents: string, overwrite = false, callback?: APIResponseHandler) {
+        const id = callback ? this.registerResponseHandler(callback) : 0;
+        setTimeout(() => this.sketchup.writeFile(id, path, contents, overwrite), 0);
+    }
+
+    private registerResponseHandler(callback: (ok: boolean, message?: string) => void) {
+        const id = ++this.callId;
+        this.responseQueue[id] = callback;
+        return id;
     }
 
     private addCallback(type: CallbackType, fn: Function) {

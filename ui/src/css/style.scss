@@ -127,22 +127,34 @@ button {
     z-index: 10000;
     background-color: #0095ff;
 
+    @mixin dialogIcon($content) {
+        $size: 8vh;
+        content: $content;
+        position: absolute;
+        top: calc(#{-1 * $size} - #{$spacing});
+        left: calc(50% - #{$size / 2});
+        width: $size;
+        height: $size;
+        font-size: $size;
+        line-height: $size;
+        text-align: center;
+        background-color: rgba(255,255,255,0.15);
+        border-radius: .5vh;
+    }
+
     &.error {
         background-color: #d63b2d;
 
         .overlay-dialog:before {
-            $size: 8vh;
-            content: '\00D7';
-            position: absolute;
-            top: 0;
-            left: -1.2 * $size;
-            width: $size;
-            height: $size;
-            font-size: $size;
-            line-height: $size;
-            text-align: center;
-            background-color: rgba(255,255,255,0.15);
-            border-radius: .5vh;
+            @include dialogIcon('\00D7')
+        }
+    }
+
+    &.success {
+        background-color: #09a85f;
+
+        .overlay-dialog:before {
+            @include dialogIcon('\2713')
         }
     }
 
@@ -157,7 +169,7 @@ button {
         text-align: center;
 
         .overlay-dialog-buttons {
-            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
             margin-top: $spacing;
         }
 

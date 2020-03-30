@@ -34,7 +34,7 @@ export class App extends React.Component<AppProps, AppState> {
         this.dismissDialog = this.dismissDialog.bind(this);
 
         Sketchup.onReceiveModelData(this.receiveModelData.bind(this));
-        Sketchup.onError(s => this.showError(`A plugin error occurred: ${s}`));
+        Sketchup.onMessage(this.showMessage.bind(this));
     }
 
     componentDidMount() {
@@ -91,10 +91,10 @@ export class App extends React.Component<AppProps, AppState> {
         });
     }
 
-    showError(message: string) {
+    showMessage(message: string, className?: DialogClassName) {
         this.showDialog({
             message,
-            className: DialogClassName.Error
+            className
         });
     }
 

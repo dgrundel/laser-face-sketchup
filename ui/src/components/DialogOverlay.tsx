@@ -3,7 +3,8 @@ import * as React from "react";
 export type DialogButtonMap = Record<string, () => void>;
 
 export enum DialogClassName {
-    Error = "error",
+    Error = 'error',
+    Success = 'success',
 }
 
 export interface DialogProps {
