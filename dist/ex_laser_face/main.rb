@@ -5,7 +5,7 @@ module Grundel
   module LaserFace
 
     USER_PREFS_FILE_PATH = File.absolute_path('.laser_face_prefs.json', Dir.home)
-    DIALOG_HTML_PATH = File.expand_path('../ui/dist/index.html', File.dirname(__FILE__))
+    DIALOG_HTML_PATH = File.expand_path('index.html', File.dirname(__FILE__))
     DIALOG_OPTIONS = {
       dialog_title: 'LaserFace',
       preferences_key: 'com.grundel.laserFace',
