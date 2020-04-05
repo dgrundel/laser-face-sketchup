@@ -22,6 +22,10 @@ module Grundel
       style: UI::HtmlDialog::STYLE_DIALOG
     }.freeze
 
+    def self.str_blank?(s)
+      s.nil? || s.to_s.strip.empty?
+    end
+
     def self.loop_vertices(loop)
       loop.vertices.map do |v|
         v.position.to_a
@@ -120,8 +124,10 @@ module Grundel
         dialog.execute_script("sketchupConnector.receiveModelData(#{dialog_data_value.to_json})")
       end
 
-      dialog.add_action_callback('getExportPath') do |_action_context|
-        path_to_save_to = UI.savepanel('Export as SVG', Dir.home, 'export.svg')
+      dialog.add_action_callback('getExportPath') do |_action_context, prev_path, prev_name|
+        start_path = str_blank?(prev_path) ? Dir.home : prev_path
+        start_name = str_blank?(prev_name) ? 'export.svg' : prev_name
+        path_to_save_to = UI.savepanel('Export as SVG', start_path, start_name)
         dialog.execute_script("sketchupConnector.receiveExportPath(#{path_to_save_to.to_json})")
       end
 

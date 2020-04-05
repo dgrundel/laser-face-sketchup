@@ -59,7 +59,7 @@ export class UnitHelper {
 
 interface SketchupRubyAPI {
     getData: () => void;
-    getExportPath: () => void;
+    getExportPath: (path?: string, fileName?:string) => void;
     getUserPrefs: () => void;
     saveUserPrefs: (jsonStr: string) => void;
     writeFile: (id: number, path: string, contents: string, overwrite: boolean) => void;
@@ -120,8 +120,8 @@ class SketchupAPI {
         this.addCallback('receiveModelData', fn);
     }
 
-    getExportPath() {
-        setTimeout(this.sketchup.getExportPath, 0);
+    getExportPath(path?: string, fileName?: string) {
+        setTimeout(() => this.sketchup.getExportPath(path, fileName), 0);
     }
 
     receiveExportPath(path: string) {

@@ -44,6 +44,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
 
         Sketchup.onReceiveExportPath(this.receiveExportPath.bind(this));
 
+        this.chooseExportPath = this.chooseExportPath.bind(this);
         this.reloadWindow = this.reloadWindow.bind(this);
         this.onMultiFileOptionChange = this.onMultiFileOptionChange.bind(this);
         this.onOverwriteExistingChange = this.onOverwriteExistingChange.bind(this);
@@ -51,19 +52,34 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         this.doExport = this.doExport.bind(this);
     }
 
+    chooseExportPath() {
+        const app = this.props.app;
+
+        const path = this.state.exportPath;
+        const fileSeparators = app.state.fileSeparators;
+
+        const splitPath = this.splitFilePath(path, fileSeparators);
+        // after the splice operation, splitPath contains only the folder path
+        const fileName = splitPath.splice(splitPath.length - 1, 1)[0];
+
+        Sketchup.getExportPath(splitPath.join(fileSeparators[0]), fileName);
+    }
+
     /**
      * This is called once the user is done selecting an output file.
      * @param exportPath
      */
     receiveExportPath(exportPath: string) {
-        this.setState({
-            exportPath
-        });
+        if (exportPath) {
+            this.setState({
+                exportPath
+            });
 
-        this.props.app.updatePreferences((userPrefs => {
-            userPrefs.lastExportPath = exportPath;
-            return userPrefs;
-        }));
+            this.props.app.updatePreferences((userPrefs => {
+                userPrefs.lastExportPath = exportPath;
+                return userPrefs;
+            }));
+        }
     }
 
     reloadWindow() {
@@ -188,7 +204,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
         }, 0);
     }
 
-    private splitFilePath(path: string, fileSeparators: Array<string>) {
+    splitFilePath(path: string, fileSeparators: Array<string>) {
         return fileSeparators.reduce((pathParts, sep) => {
             return pathParts.reduce((parts, part) => {
                 return parts.concat(part.split(sep));
@@ -245,7 +261,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
             <div className="options-panel-group">
                 <h3>Export Path</h3>
                 <p className="break">{this.state.exportPath}</p>
-                <button className="block" onClick={() => Sketchup.getExportPath()}>Choose File</button>
+                <button className="block" onClick={this.chooseExportPath}>Choose File</button>
             </div>
 
             <div id="options-footer">
