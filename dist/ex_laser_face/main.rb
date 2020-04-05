@@ -34,6 +34,16 @@ module Grundel
       end.map(&method(:loop_vertices))
     end
 
+    def self.face_data(selected_faces)
+      selected_faces.map do |f|
+        {
+            normal: f.normal.to_a,
+            outer_loop: loop_vertices(f.outer_loop),
+            other_loops: outer_loop_vertices(f)
+        }
+      end
+    end
+
     def self.send_error_to_dialog(dialog, message)
       dialog.execute_script("sketchupConnector.receiveMessage(#{message.to_json}, 'error')")
     end
@@ -70,6 +80,16 @@ module Grundel
         end
       end
 
+      dialog.add_action_callback('getFaces') do |_action_context, id|
+        begin
+          selected_faces = Sketchup.active_model.selection.grep(Sketchup::Face)
+          face_data = face_data(selected_faces)
+          send_api_response_to_dialog(dialog, id, true, face_data)
+        rescue StandardError => e
+          send_api_response_to_dialog(dialog, id, false, e.message)
+        end
+      end
+
       dialog.add_action_callback('saveUserPrefs') do |_action_context, prefs_json|
         begin
           write_file(prefs_json, USER_PREFS_FILE_PATH, true)
@@ -95,13 +115,7 @@ module Grundel
           fileSeparators: [File::SEPARATOR, File::ALT_SEPARATOR],
           userPrefsJson: user_prefs_json,
           units: model_units,
-          faces: selected_faces.map do |f|
-            {
-              normal: f.normal.to_a,
-              outer_loop: loop_vertices(f.outer_loop),
-              other_loops: outer_loop_vertices(f)
-            }
-          end
+          faces: face_data(selected_faces)
         }
         dialog.execute_script("sketchupConnector.receiveModelData(#{dialog_data_value.to_json})")
       end

@@ -21,7 +21,6 @@ export interface AppState {
     fileSeparators?: Array<string>;
     userPrefs?: UserPrefs;
     unitHelper?: UnitHelper;
-    faces?: Array<Face>;
     faces2d?: Array<Face2d>;
 }
 
@@ -33,13 +32,43 @@ export class App extends React.Component<AppProps, AppState> {
         };
 
         this.dismissDialog = this.dismissDialog.bind(this);
+        this.addFaces = this.addFaces.bind(this);
+        this.removeFace = this.removeFace.bind(this);
+        this.removeAllFaces = this.removeAllFaces.bind(this);
 
         Sketchup.onReceiveModelData(this.receiveModelData.bind(this));
         Sketchup.onMessage(this.showMessage.bind(this));
+
+        window.onerror = (event: Event | string, source?: string, lineno?: number, colno?: number, error?: Error) => {
+            let messages = ['A JavaScript error occurred in the plugin.'];
+            if (error) {
+                messages.push(error.message);
+            } else if (typeof event === 'string') {
+                messages.push(event);
+            }
+            this.showMessage(messages.join('\n'), DialogClassName.Error);
+        }
     }
 
     componentDidMount() {
         Sketchup.getModelData();
+    }
+
+    transformFaceData(f: Face) {
+        const rotation: IQuaternion = Quaternion.rotationFromTo(f.normal, Z_NORMAL);
+        const outerLoop3d = f.outer_loop.map(v => rotation.rotate(v));
+        const otherLoops3d = f.other_loops.map(loop => loop.map(v => rotation.rotate(v)));
+
+        const rotationResult = rotatePointsToSmallestBox(outerLoop3d);
+        const offsetter = createOffsetter(rotationResult.points);
+
+        const outerLoop = rotationResult.points.map(offsetter);
+        const otherLoops = otherLoops3d.map(loop => rotatePolygon(loop, rotationResult.degrees).map(offsetter));
+
+        return {
+            outerLoop,
+            otherLoops
+        };
     }
 
     receiveModelData(data: ModelData) {
@@ -47,29 +76,13 @@ export class App extends React.Component<AppProps, AppState> {
         const userPrefs = JSON.parse(data.userPrefsJson) as UserPrefs;
         const unitHelper = getUnitHelper(data.units);
         const faces = data.faces;
-        const faces2d: Array<Face2d> = faces.map(f => {
-            const rotation: IQuaternion = Quaternion.rotationFromTo(f.normal, Z_NORMAL);
-            const outerLoop3d = f.outer_loop.map(v => rotation.rotate(v));
-            const otherLoops3d = f.other_loops.map(loop => loop.map(v => rotation.rotate(v)));
-
-            const rotationResult = rotatePointsToSmallestBox(outerLoop3d);
-            const offsetter = createOffsetter(rotationResult.points);
-
-            const outerLoop = rotationResult.points.map(offsetter);
-            const otherLoops = otherLoops3d.map(loop => rotatePolygon(loop, rotationResult.degrees).map(offsetter));
-
-            return {
-                outerLoop,
-                otherLoops
-            };
-        });
+        const faces2d: Array<Face2d> = faces.map(f => this.transformFaceData(f));
 
         this.setState({
             loading: false,
             fileSeparators,
             userPrefs,
             unitHelper,
-            faces,
             faces2d
         });
     }
@@ -108,6 +121,38 @@ export class App extends React.Component<AppProps, AppState> {
         });
     }
 
+    addFaces() {
+        Sketchup.getFaces((ok: boolean, response: Array<Face> | string) => {
+            if (!ok) {
+                this.showMessage(response as string, DialogClassName.Error);
+                return;
+            }
+
+            const faces = response as Array<Face>;
+            const faces2d: Array<Face2d> = faces.map(f => this.transformFaceData(f));
+            this.setState(prev => ({
+                faces2d: prev.faces2d.concat(faces2d)
+            }));
+        });
+    }
+
+    removeFace(index: number) {
+        this.setState(prev => {
+            const faces2d = prev.faces2d.slice();
+            faces2d.splice(index, 1);
+
+            return {
+                faces2d
+            }
+        });
+    }
+
+    removeAllFaces() {
+        this.setState({
+            faces2d: []
+        });
+    }
+
     render() {
         if (this.state.loading) {
             return <SpinnerOverlay/>;
@@ -118,7 +163,9 @@ export class App extends React.Component<AppProps, AppState> {
         }
 
         return <div>
-            <FacesPanel faces={this.state.faces2d} unitHelper={this.state.unitHelper}/>
+            <FacesPanel faces={this.state.faces2d}
+                        removeFace={this.removeFace}
+                        unitHelper={this.state.unitHelper}/>
             <OptionsPanel app={this}/>
         </div>;
     }

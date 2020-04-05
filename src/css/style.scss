@@ -89,6 +89,11 @@ button {
 
     &.block {
         width: 100%;
+
+        // squash adjacent block buttons
+        & + button.block {
+            margin-top: -1 * $half-spacing;
+        }
     }
 }
 

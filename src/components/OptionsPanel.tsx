@@ -197,8 +197,12 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
     }
 
     render() {
+        const app = this.props.app;
+
         return <div id="options">
-            <button className={'block'} onClick={this.reloadWindow}>Reload</button>
+            <button className="block" onClick={this.reloadWindow}>Reload</button>
+            <button className="block" onClick={app.removeAllFaces}>Remove All Faces</button>
+            <button className="block primary" onClick={app.addFaces}>Add Faces</button>
 
             <div className="options-panel-group">
                 <h3>How many files?</h3>
@@ -245,7 +249,7 @@ export class OptionsPanel extends React.Component<OptionsPanelProps, OptionsPane
             </div>
 
             <div id="options-footer">
-                <button className={'block primary'} onClick={this.doExport}>Export</button>
+                <button className="block primary" onClick={this.doExport}>Export</button>
             </div>
         </div>;
     }

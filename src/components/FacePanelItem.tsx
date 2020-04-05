@@ -7,6 +7,7 @@ import {RenderedFace} from "./RenderedFace";
 
 export interface FaceProps {
     face: Face2d;
+    removeFace: () => void;
     unitHelper: UnitHelper;
 }
 
@@ -42,6 +43,7 @@ export class FacePanelItem extends React.Component<FaceProps, {}> {
                     </tr>
                 </tbody>
             </table>
+            <button className="block" onClick={this.props.removeFace}>Remove</button>
         </div>;
     }
 

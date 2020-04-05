@@ -63,6 +63,7 @@ interface SketchupRubyAPI {
     getUserPrefs: () => void;
     saveUserPrefs: (jsonStr: string) => void;
     writeFile: (id: number, path: string, contents: string, overwrite: boolean) => void;
+    getFaces: (id: number) => void;
 }
 
 export interface ModelData {
@@ -73,7 +74,7 @@ export interface ModelData {
 }
 
 type CallbackType = 'message' | 'receiveModelData' | 'receiveExportPath';
-type APIResponseHandler = (ok: boolean, message?: string) => void;
+type APIResponseHandler = (ok: boolean, data?: any) => void;
 
 class SketchupAPI {
     sketchup: SketchupRubyAPI;
@@ -139,6 +140,11 @@ class SketchupAPI {
     writeFile(path: string, contents: string, overwrite = false, callback?: APIResponseHandler) {
         const id = callback ? this.registerResponseHandler(callback) : 0;
         setTimeout(() => this.sketchup.writeFile(id, path, contents, overwrite), 0);
+    }
+
+    getFaces(callback?: APIResponseHandler) {
+        const id = callback ? this.registerResponseHandler(callback) : 0;
+        setTimeout(() => this.sketchup.getFaces(id), 0);
     }
 
     private registerResponseHandler(callback: (ok: boolean, message?: string) => void) {

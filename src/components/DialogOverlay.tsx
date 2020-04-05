@@ -24,7 +24,7 @@ export class DialogOverlay extends React.Component<DialogProps, {}> {
         return <div id="overlay" className={this.props.className}>
             <div className="overlay-dialog">
                 <div className="overlay-dialog-message">{this.props.message.split(/\n/).map(s => {
-                    return <p>{s}</p>;
+                    return <p key={s}>{s}</p>;
                 })}</div>
                 <div className="overlay-dialog-buttons">
                     {Object.keys(buttonMap).map((buttonText) => {
