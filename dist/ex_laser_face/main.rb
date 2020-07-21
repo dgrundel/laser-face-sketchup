@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'sketchup.rb'
+require 'json'
 
 module Grundel
   module LaserFace
